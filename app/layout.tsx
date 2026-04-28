@@ -24,6 +24,28 @@ export const metadata: Metadata = {
     shortcut: '/eipFavicon.png',
     apple: '/eipFavicon.png',
   },
+  metadataBase: new URL('https://docs.eipsinsight.com'),
+  openGraph: {
+    title: 'docs.EIPsInsight',
+    description: 'docs.EIPsInsight',
+    url: 'https://docs.eipsinsight.com',
+    siteName: 'docs.EIPsInsight',
+    images: [
+      {
+        url: '/eipsinsighthomepage_label.png',
+        width: 1600,
+        height: 900,
+        alt: 'EIPsInsight dashboard preview',
+      },
+    ],
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'docs.EIPsInsight',
+    description: 'docs.EIPsInsight',
+    images: ['/eipsinsighthomepage_label.png'],
+  },
 }
 
 export default function RootLayout({

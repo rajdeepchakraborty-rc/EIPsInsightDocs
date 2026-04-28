@@ -354,7 +354,7 @@ export default function Home() {
         {
           question: 'Which EIPInsight pages should I use for different tasks?',
           answer:
-            'Use Standards for proposal details, Analytics for trends and workload, Governance for process context, and API pages for programmatic access. The best path depends on whether you are researching, building, or coordinating reviews.',
+            'Use Standards for proposal details, Analytics for trends and workload, and Governance for process context. The best path depends on whether you are researching, building, or coordinating reviews.',
         },
         {
           question: 'Does EIPInsight cover pull requests and issues too?',
@@ -1800,7 +1800,6 @@ export default function Home() {
             <a href="#home">Home</a>
             <a href="#standards">Standards</a>
             <a href="#upgrades">Upgrades</a>
-            <a href="#api">API</a>
             <a href="#faq">FAQ</a>
           </div>
           <div className="navbar-right">
@@ -2481,48 +2480,6 @@ export default function Home() {
             <p>Use guided templates and validation hints to draft cleaner proposals faster.</p>
             <h3 id="tools-timeline">Timeline</h3>
             <p>Track changes chronologically with milestone-level context for upgrades and proposal states.</p>
-          </section>
-
-          {/* API */}
-          <section className="content-section" id="api" aria-labelledby="api-overview" data-section="api" itemScope itemType="https://schema.org/WebPageElement">
-            <h2 id="api-overview">Developer API</h2>
-
-            <h3 id="api-overview">Overview</h3>
-            <p>
-              The EIPInsight API provides programmatic access to all proposal data, governance metrics, and upgrade timelines. Build applications on top of EIPInsight to create custom dashboards, analysis tools, or community tools.
-            </p>
-
-            <h3 id="endpoints-reference">Endpoints Reference</h3>
-            <div className="card-list">
-              <div className="card">
-                <h4>GET /api/proposals</h4>
-                <p>Retrieve all proposals with filtering and pagination options</p>
-              </div>
-              <div className="card">
-                <h4>GET /api/proposals/:number</h4>
-                <p>Get detailed information about a specific proposal</p>
-              </div>
-              <div className="card">
-                <h4>GET /api/upgrades</h4>
-                <p>Retrieve information about planned upgrades</p>
-              </div>
-              <div className="card">
-                <h4>GET /api/governance/pr-stats</h4>
-                <p>Access governance and PR analytics data</p>
-              </div>
-            </div>
-
-            <h3 id="code-examples">Code Examples</h3>
-            <div className="code-block">
-{`// Fetch all EIPs
-const response = await fetch('https://api.eipinsight.com/api/proposals?type=EIP');
-const eips = await response.json();
-
-// Get a specific proposal
-const eip1559 = await fetch('https://api.eipinsight.com/api/proposals/1559');
-const data = await eip1559.json();
-console.log(data.title);`}
-            </div>
           </section>
 
           {/* FAQ */}
