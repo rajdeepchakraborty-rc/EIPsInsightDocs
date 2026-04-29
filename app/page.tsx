@@ -2,12 +2,14 @@
 
 import { useEffect, useState, type CSSProperties } from 'react';
 import Link from 'next/link';
+import { Check, Link2 } from 'lucide-react';
 import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/components/ui/hover-card';
 
 export default function Home() {
   const [isLoaderVisible, setIsLoaderVisible] = useState(true);
   const [isDark, setIsDark] = useState(true);
   const [showSupportBanner, setShowSupportBanner] = useState(true);
+  const [copiedSectionId, setCopiedSectionId] = useState<string | null>(null);
   const [activeSectionId, setActiveSectionId] = useState('about');
   const [activeItemId, setActiveItemId] = useState('about-overview');
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
@@ -30,6 +32,22 @@ export default function Home() {
   useEffect(() => {
     document.documentElement.classList.toggle('dark-mode', isDark);
   }, [isDark]);
+
+  useEffect(() => {
+    if (isLoaderVisible || typeof window === 'undefined' || !window.location.hash) {
+      return;
+    }
+
+    const targetId = window.location.hash.slice(1);
+    const target = document.getElementById(targetId);
+    if (!target) {
+      return;
+    }
+
+    window.requestAnimationFrame(() => {
+      target.scrollIntoView({ behavior: 'auto', block: 'start' });
+    });
+  }, [isLoaderVisible]);
 
   useEffect(() => {
     const sectionIdLookup = new Map(navSections.map((section) => [section.sectionId, section.id]));
@@ -158,9 +176,81 @@ export default function Home() {
     target.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
+  const copySectionLink = async (targetId: string) => {
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    const link = `${window.location.origin}${window.location.pathname}${window.location.search}#${targetId}`;
+
+    try {
+      await navigator.clipboard.writeText(link);
+      setCopiedSectionId(targetId);
+    } catch {
+      const tempInput = document.createElement('input');
+      tempInput.value = link;
+      tempInput.setAttribute('readonly', 'true');
+      tempInput.style.position = 'absolute';
+      tempInput.style.left = '-9999px';
+      document.body.appendChild(tempInput);
+      tempInput.select();
+      document.execCommand('copy');
+      document.body.removeChild(tempInput);
+      setCopiedSectionId(targetId);
+    }
+  };
+
+  useEffect(() => {
+    if (!copiedSectionId) {
+      return;
+    }
+
+    const timer = window.setTimeout(() => {
+      setCopiedSectionId(null);
+    }, 1400);
+
+    return () => window.clearTimeout(timer);
+  }, [copiedSectionId]);
+
   const activeProposalsTotal = 1152;
   const activeProposalsDraft = 349;
   const activeProposalsOther = activeProposalsTotal - activeProposalsDraft;
+
+  const CopyLinkButton = ({ targetId, label }: { targetId: string; label: string }) => (
+    <button
+      type="button"
+      className={`copy-link-button ${copiedSectionId === targetId ? 'copied' : ''}`}
+      aria-label={`Copy link to ${label}`}
+      title={`Copy link to ${label}`}
+      onClick={() => copySectionLink(targetId)}
+    >
+      {copiedSectionId === targetId ? <Check size={14} /> : <Link2 size={14} />}
+      <span className="copy-link-button-text">{copiedSectionId === targetId ? 'Copied' : 'Copy link'}</span>
+    </button>
+  );
+
+  const AnchorHeading = ({
+    targetId,
+    title,
+    level = 'h2',
+    className = '',
+    headingId,
+  }: {
+    targetId: string;
+    title: string;
+    level?: 'h2' | 'h3';
+    className?: string;
+    headingId?: string;
+  }) => {
+    const HeadingTag = level;
+
+    return (
+      <div className={`anchor-heading ${className}`.trim()}>
+        <HeadingTag id={headingId ?? targetId}>{title}</HeadingTag>
+        <CopyLinkButton targetId={targetId} label={title} />
+      </div>
+    );
+  };
 
   const navSections = [
     {
@@ -202,10 +292,10 @@ export default function Home() {
     {
       id: 'upgrade',
       group: 'Standards & Governance',
-      label: 'Upgrade Watch',
+      label: 'Upgrades',
       sectionId: 'upgrades',
       items: [
-        { label: 'What is Upgrade Watch?', sectionId: 'what-is-upgrade-watch' },
+        { label: 'What is Upgrades?', sectionId: 'what-is-upgrade-watch' },
         { label: 'Reading the Timeline', sectionId: 'reading-the-timeline' },
         { label: 'Upcoming: Glamsterdam', sectionId: 'upcoming-glamsterdam' },
       ],
@@ -1497,6 +1587,75 @@ export default function Home() {
           margin-bottom: 14px;
         }
 
+        .section-label-row {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 12px;
+          margin-bottom: 14px;
+        }
+
+        .section-label-row .section-label {
+          margin-bottom: 0;
+        }
+
+        .anchor-heading {
+          display: flex;
+          align-items: flex-start;
+          justify-content: space-between;
+          gap: 14px;
+        }
+
+        .anchor-heading h2,
+        .anchor-heading h3 {
+          margin: 0;
+          scroll-margin-top: calc(84px + var(--support-banner-height, 0px));
+        }
+
+        .copy-link-button {
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+          flex-shrink: 0;
+          padding: 6px 10px;
+          border: 1px solid var(--border);
+          border-radius: 999px;
+          background: var(--bg);
+          color: var(--text2);
+          font-family: var(--font-space-grotesk), 'Space Grotesk', sans-serif;
+          font-size: 11px;
+          font-weight: 700;
+          line-height: 1;
+          cursor: pointer;
+          transition: transform 160ms ease, border-color 160ms ease, background-color 160ms ease, color 160ms ease;
+        }
+
+        .copy-link-button:hover {
+          transform: translateY(-1px);
+          border-color: var(--accent);
+          color: var(--text);
+        }
+
+        .copy-link-button.copied {
+          border-color: var(--accent);
+          color: var(--accent);
+          background: color-mix(in oklab, var(--accent) 12%, var(--bg));
+        }
+
+        .copy-link-button-text {
+          white-space: nowrap;
+        }
+
+        @media (max-width: 768px) {
+          .anchor-heading {
+            align-items: center;
+          }
+
+          .copy-link-button-text {
+            display: none;
+          }
+        }
+
         .about-title {
           max-width: 980px;
           font-size: clamp(36px, 4.2vw, 58px);
@@ -1941,7 +2100,10 @@ export default function Home() {
 
           <section className="content-section" id="about-us" aria-labelledby="about-overview" data-section="about" itemScope itemType="https://schema.org/WebPageElement">
             <div className="about-intro" id="about-overview">
-              <div className="section-label">About</div>
+              <div className="section-label-row">
+                <div className="section-label">About</div>
+                <CopyLinkButton targetId="about-overview" label="About section" />
+              </div>
               <h2 className="about-title">EIPInsight turns Ethereum standards activity into something people can actually navigate.</h2>
               <p className="about-summary">
                 We build an operational view of EIPs, ERCs, RIPs, proposal workflows, and governance movement so builders, editors, researchers, and newcomers can understand what is changing and why.
@@ -1969,7 +2131,10 @@ export default function Home() {
 
             <div className="about-panels">
               <div className="about-panel" id="why-we-built-this">
-                <div className="section-label">Why We Built This</div>
+                <div className="section-label-row">
+                  <div className="section-label">Why We Built This</div>
+                  <CopyLinkButton targetId="why-we-built-this" label="Why We Built This" />
+                </div>
                 <h3>Standards and governance should not require institutional memory to follow.</h3>
                 <p>
                   Ethereum governance happens across repositories, pull requests, review queues, forum threads, upgrades, and informal coordination. The data is public, but the workflow is still hard to inspect as a system.
@@ -1983,7 +2148,10 @@ export default function Home() {
               </div>
 
               <div className="about-panel" id="how-people-use-it">
-                <div className="section-label">How People Use It</div>
+                <div className="section-label-row">
+                  <div className="section-label">How People Use It</div>
+                  <CopyLinkButton targetId="how-people-use-it" label="How People Use It" />
+                </div>
                 <h3>From reading standards to working with them.</h3>
                 <div className="use-list">
                   <div className="use-item">
@@ -2009,9 +2177,9 @@ export default function Home() {
 
           {/* STANDARDS */}
           <section className="content-section" id="standards" aria-labelledby="standards-overview" data-section="standards" itemScope itemType="https://schema.org/WebPageElement">
-            <h2 id="standards-overview">Standards & Proposals</h2>
+            <AnchorHeading targetId="standards-overview" title="Standards & Proposals" />
 
-            <h3 id="eips-explained">EIPs Explained</h3>
+            <AnchorHeading targetId="eips-explained" title="EIPs Explained" level="h3" />
             <p>
               EIPs are the primary mechanism for proposing changes to the Ethereum protocol. They follow a standardized process from initial discussion through community review to final implementation.
             </p>
@@ -2026,12 +2194,12 @@ export default function Home() {
 }`}
             </div>
 
-            <h3 id="ercs-explained">ERCs Explained</h3>
+            <AnchorHeading targetId="ercs-explained" title="ERCs Explained" level="h3" />
             <p>
               ERCs define standards for tokens and smart contract interfaces. The most well-known is ERC-20 (fungible tokens), but there are many others including ERC-721 (NFTs) and ERC-1155 (multi-token standard).
             </p>
 
-            <h3 id="rips-explained">RIPs Explained</h3>
+            <AnchorHeading targetId="rips-explained" title="RIPs Explained" level="h3" />
             <p>
               RIPs provide a standardized way to propose and discuss improvements to rollup solutions and scaling solutions built on Ethereum.
             </p>
@@ -2052,7 +2220,7 @@ export default function Home() {
               }}
             />
 
-            <h3 id="proposal-lifecycle">Proposal Lifecycle</h3>
+            <AnchorHeading targetId="proposal-lifecycle" title="Proposal Lifecycle" level="h3" />
             <div className="card-list">
               <div className="card">
                 <h4>📋 Idea</h4>
@@ -2075,7 +2243,7 @@ export default function Home() {
 
           {/* EXPLORE */}
           <section className="content-section" id="explore" aria-labelledby="explore-hub" data-section="explore" itemScope itemType="https://schema.org/WebPageElement">
-            <h2 id="explore-hub">Explore</h2>
+            <AnchorHeading targetId="explore-hub" title="Explore" />
             <p>
               Explore views turn the standards feed into focused lenses, helping you spot spikes, stalls, ownership patterns, and category shifts without digging through raw lists.
             </p>
@@ -2083,7 +2251,7 @@ export default function Home() {
             <div className="explore-grid">
               <article className="explore-card" id="explore-by-year">
                 <div className="explore-card-kicker">By Year</div>
-                <h3>Watch the timeline breathe.</h3>
+                <AnchorHeading targetId="explore-by-year" headingId="explore-by-year-title" title="Watch the timeline breathe." level="h3" />
                 <p>
                   Compare proposal traffic year by year to find active eras, quiet stretches, and the moments when standards work picked up speed.
                 </p>
@@ -2092,7 +2260,7 @@ export default function Home() {
 
               <article className="explore-card" id="explore-by-status">
                 <div className="explore-card-kicker">By Status</div>
-                <h3>See where work is moving.</h3>
+                <AnchorHeading targetId="explore-by-status" headingId="explore-by-status-title" title="See where work is moving." level="h3" />
                 <p>
                   Track Draft, Review, Last Call, Final, and Deferred states as a funnel so you can instantly see what is progressing and what needs attention.
                 </p>
@@ -2101,7 +2269,7 @@ export default function Home() {
 
               <article className="explore-card" id="explore-by-role">
                 <div className="explore-card-kicker">By Role</div>
-                <h3>Map the people behind each change.</h3>
+                <AnchorHeading targetId="explore-by-role" headingId="explore-by-role-title" title="Map the people behind each change." level="h3" />
                 <p>
                   Follow authors, editors, reviewers, and implementers to understand who is shaping the proposal, who is reviewing it, and where responsibility sits.
                 </p>
@@ -2110,7 +2278,7 @@ export default function Home() {
 
               <article className="explore-card" id="explore-by-category">
                 <div className="explore-card-kicker">By Category</div>
-                <h3>Compare what kind of work it is.</h3>
+                <AnchorHeading targetId="explore-by-category" headingId="explore-by-category-title" title="Compare what kind of work it is." level="h3" />
                 <p>
                   Group standards by category to separate Core work from ERCs, interfaces, and other tracks so the mix of proposal types stays easy to read.
                 </p>
@@ -2121,14 +2289,17 @@ export default function Home() {
 
           {/* UPGRADES */}
           <section className="content-section" id="upgrades" aria-labelledby="upgrades-overview" data-section="upgrades" itemScope itemType="https://schema.org/WebPageElement">
-            <h2 id="upgrades-overview">Upgrade Watch</h2>
+            <AnchorHeading targetId="upgrades-overview" title="Upgrades" />
             <p>
               Follow how Ethereum upgrades move from proposals into coordinated network change. This section ties together EIP inclusion, client readiness, and the major milestones that shape each upgrade cycle.
             </p>
 
             <div className="upgrade-layout">
               <div className="upgrade-panel" id="what-is-upgrade-watch">
-                <div className="section-label">Upgrade Features</div>
+                <div className="section-label-row">
+                  <div className="section-label">Upgrade Features</div>
+                  <CopyLinkButton targetId="what-is-upgrade-watch" label="Upgrade Features" />
+                </div>
                 <div className="upgrade-top-grid">
                   <div className="upgrade-top-card">
                     <h4>Upgrade sequence</h4>
@@ -2170,8 +2341,11 @@ export default function Home() {
               </figure>
 
               <div className="upgrade-panel upgrade-guide" id="reading-the-timeline">
-                <div className="section-label">How to Read Upgrades</div>
-                <h3>Step-by-step: read upgrades properly</h3>
+                <div className="section-label-row">
+                  <div className="section-label">How to Read Upgrades</div>
+                  <CopyLinkButton targetId="reading-the-timeline" label="How to Read Upgrades" />
+                </div>
+                <AnchorHeading targetId="reading-the-timeline" headingId="reading-the-timeline-title" title="Step-by-step: read upgrades properly" level="h3" />
                 <p>
                   Start from the timeline row, then drill into EIP composition and status transitions. Use this order to quickly understand what changed, why it changed, and what is likely to ship next.
                 </p>
@@ -2230,7 +2404,7 @@ export default function Home() {
               </div>
             </div>
 
-            <h3 id="upcoming-glamsterdam">Upcoming: Glamsterdam</h3>
+            <AnchorHeading targetId="upcoming-glamsterdam" title="Upcoming: Glamsterdam" level="h3" />
             <p>
               EIPInsight uses the upgrade timeline to keep the next phase of Ethereum visible, from current standards work through the proposals expected to land in Glamsterdam and beyond.
             </p>
@@ -2253,7 +2427,7 @@ export default function Home() {
                 boxShadow: '0 8px 24px rgba(0, 0, 0, 0.16)',
               }}
             />
-            <h2 id="analytics-overview">Analytics</h2>
+            <AnchorHeading targetId="analytics-overview" title="Analytics" />
             <p>
               Analytics is designed for decision making, not just reporting. Use the guides below to understand what each view is for, which controls matter most, and how to read the visuals correctly.
             </p>
@@ -2261,7 +2435,7 @@ export default function Home() {
             <div className="analytics-playbook">
               <article className="analytics-card" id="analytics-eips">
                 <div className="analytics-card-kicker">EIPs Analytics</div>
-                <h3>Use this to read proposal health.</h3>
+                <AnchorHeading targetId="analytics-eips" headingId="analytics-eips-title" title="Use this to read proposal health." level="h3" />
                 <p>Start here when you need a top-level pulse on standards flow, backlog risk, and which proposal categories are dominating the system.</p>
                 <div className="analytics-card-block">
                   <h4>Key features</h4>
@@ -2285,7 +2459,7 @@ export default function Home() {
 
               <article className="analytics-card" id="analytics-prs">
                 <div className="analytics-card-kicker">PR Analytics</div>
-                <h3>Use this to monitor delivery pace.</h3>
+                <AnchorHeading targetId="analytics-prs" headingId="analytics-prs-title" title="Use this to monitor delivery pace." level="h3" />
                 <p>This view shows how quickly work enters and exits review. It is best for spotting merge slowdowns, seasonal load, and review throughput changes.</p>
                 <div className="analytics-card-block">
                   <h4>Key features</h4>
@@ -2309,7 +2483,7 @@ export default function Home() {
 
               <article className="analytics-card" id="analytics-issues">
                 <div className="analytics-card-kicker">Issues Analytics</div>
-                <h3>Use this to track blockers and support load.</h3>
+                <AnchorHeading targetId="analytics-issues" headingId="analytics-issues-title" title="Use this to track blockers and support load." level="h3" />
                 <p>The Issues page helps you inspect unresolved friction, recurring labels, and where open problem volume may slow standards progress.</p>
                 <div className="analytics-card-block">
                   <h4>Key features</h4>
@@ -2333,7 +2507,7 @@ export default function Home() {
 
               <article className="analytics-card" id="analytics-board">
                 <div className="analytics-card-kicker">Board View</div>
-                <h3>Use this to execute day-to-day triage.</h3>
+                <AnchorHeading targetId="analytics-board" headingId="analytics-board-title" title="Use this to execute day-to-day triage." level="h3" />
                 <p>The board is your operational workspace for selecting exact PR subsets and moving from dashboard insight to concrete follow-up actions.</p>
                 <div className="analytics-card-block">
                   <h4>Key features</h4>
@@ -2358,19 +2532,19 @@ export default function Home() {
 
             <div className="analytics-role-grid">
               <article className="analytics-role-item" id="analytics-editors">
-                <h3>Editors</h3>
+                <AnchorHeading targetId="analytics-editors" headingId="analytics-editors-title" title="Editors" level="h3" />
                 <p>Track editorial throughput, response time, and concentration of review ownership.</p>
               </article>
               <article className="analytics-role-item" id="analytics-reviewers">
-                <h3>Reviewers</h3>
+                <AnchorHeading targetId="analytics-reviewers" headingId="analytics-reviewers-title" title="Reviewers" level="h3" />
                 <p>Measure reviewer cycles, leaderboard balance, and review latency distribution.</p>
               </article>
               <article className="analytics-role-item" id="analytics-authors">
-                <h3>Authors</h3>
+                <AnchorHeading targetId="analytics-authors" headingId="analytics-authors-title" title="Authors" level="h3" />
                 <p>Understand repeat versus new author mix and proposal outcome patterns.</p>
               </article>
               <article className="analytics-role-item" id="analytics-contributors">
-                <h3>Contributors</h3>
+                <AnchorHeading targetId="analytics-contributors" headingId="analytics-contributors-title" title="Contributors" level="h3" />
                 <p>Read contribution heatmaps and activity types to detect participation trends.</p>
               </article>
             </div>
@@ -2378,7 +2552,7 @@ export default function Home() {
 
           {/* INSIGHTS */}
           <section className="content-section" id="insights" aria-labelledby="insights-overview" data-section="insights" itemScope itemType="https://schema.org/WebPageElement">
-            <h2 id="insights-overview">Insights</h2>
+            <AnchorHeading targetId="insights-overview" title="Insights" />
             <p>
               Insights helps you move from metrics to interpretation. Each module below explains how to use the view, what controls matter, and how to read outcomes without misinterpreting short-term noise.
             </p>
@@ -2390,7 +2564,7 @@ export default function Home() {
                   <img src="/monthly-insight_label.png" alt="Monthly insight label" />
                 </details>
                 <div className="insights-card-kicker">Year-Month Analysis</div>
-                <h3>Track how governance changes month to month.</h3>
+                <AnchorHeading targetId="insights-year-month" headingId="insights-year-month-title" title="Track how governance changes month to month." level="h3" />
                 <p>Use this when you want trend direction: whether proposal flow is accelerating, slowing down, or rotating between EIP, ERC, and RIP tracks.</p>
                 <div className="insights-card-block">
                   <h4>Main features</h4>
@@ -2418,7 +2592,7 @@ export default function Home() {
                   <img src="/Governance_label.png" alt="Governance label" />
                 </details>
                 <div className="insights-card-kicker">Governance & Process</div>
-                <h3>Measure process speed and friction.</h3>
+                <AnchorHeading targetId="insights-governance-process" headingId="insights-governance-process-title" title="Measure process speed and friction." level="h3" />
                 <p>This view is your operational health report: it shows decision speed, process stage conversion, and where waiting states are accumulating.</p>
                 <div className="insights-card-block">
                   <h4>Main features</h4>
@@ -2446,7 +2620,7 @@ export default function Home() {
                   <img src="/editorial_commentory_label.png" alt="Editorial commentary label" />
                 </details>
                 <div className="insights-card-kicker">Editorial Commentary</div>
-                <h3>Generate lifecycle intelligence for a proposal.</h3>
+                <AnchorHeading targetId="insights-editorial-commentary" headingId="insights-editorial-commentary-title" title="Generate lifecycle intelligence for a proposal." level="h3" />
                 <p>Use this module for a deep read on one proposal. It converts raw status history and PR context into an editor-style narrative of momentum and risk.</p>
                 <div className="insights-card-block">
                   <h4>Main features</h4>
@@ -2472,19 +2646,19 @@ export default function Home() {
 
           {/* TOOLS */}
           <section className="content-section" id="tools" aria-labelledby="tools-overview" data-section="tools" itemScope itemType="https://schema.org/WebPageElement">
-            <h2 id="tools-overview">Tools</h2>
+            <AnchorHeading targetId="tools-overview" title="Tools" />
             <p>
               Productivity tools support day-to-day standards operations, from drafting proposals to tracking dependencies and upgrade windows.
             </p>
-            <h3 id="tools-eip-builder">EIP Builder</h3>
+            <AnchorHeading targetId="tools-eip-builder" title="EIP Builder" level="h3" />
             <p>Use guided templates and validation hints to draft cleaner proposals faster.</p>
-            <h3 id="tools-timeline">Timeline</h3>
+            <AnchorHeading targetId="tools-timeline" title="Timeline" level="h3" />
             <p>Track changes chronologically with milestone-level context for upgrades and proposal states.</p>
           </section>
 
           {/* FAQ */}
           <section className="content-section" id="faq" aria-labelledby="faq-overview" data-section="faq" itemScope itemType="https://schema.org/WebPageElement">
-            <h2 id="faq-overview">FAQ</h2>
+            <AnchorHeading targetId="faq-overview" title="FAQ" />
 
             <p className="faq-intro">
               Quick answers about standards, governance workflow, and how the platform works.
@@ -2493,7 +2667,7 @@ export default function Home() {
             {faqGroups.map((group) => (
               <div key={group.sectionId} className="faq-group">
                 <div className="faq-kicker">{group.kicker}</div>
-                <h3 className="faq-group-title" id={group.sectionId}>{group.title}</h3>
+                <AnchorHeading targetId={group.sectionId} title={group.title} level="h3" className="faq-group-title-wrap" />
                 <div className="faq-stack">
                   {group.items.map((item, idx) => (
                     <details className="faq-item" key={item.question} open={idx === 0}>
