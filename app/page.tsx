@@ -256,7 +256,7 @@ export default function Home() {
     {
       id: 'about',
       group: 'Intro',
-      label: 'What is EIPInsight',
+      label: 'What is EIPsInsight',
       sectionId: 'about-us',
       items: [
         { label: 'Overview', sectionId: 'about-overview' },
@@ -427,9 +427,9 @@ export default function Home() {
       sectionId: 'faq-platform',
       items: [
         {
-          question: 'What does EIPInsight track?',
+          question: 'What does EIPsInsight track?',
           answer:
-            'EIPInsight tracks EIPs, ERCs, and RIPs across their lifecycle, plus pull request activity, governance signals, editor activity, contributor behavior, and proposal-level analytics to explain how standards evolve.',
+            'EIPsInsight tracks EIPs, ERCs, and RIPs across their lifecycle, plus pull request activity, governance signals, editor activity, contributor behavior, and proposal-level analytics to explain how standards evolve.',
         },
         {
           question: 'How often is data updated?',
@@ -442,17 +442,17 @@ export default function Home() {
             'Yes. Most analytics and standards views support export workflows such as CSV or JSON so teams can run custom analysis outside the app.',
         },
         {
-          question: 'Which EIPInsight pages should I use for different tasks?',
+          question: 'Which EIPsInsight pages should I use for different tasks?',
           answer:
             'Use Standards for proposal details, Analytics for trends and workload, and Governance for process context. The best path depends on whether you are researching, building, or coordinating reviews.',
         },
         {
-          question: 'Does EIPInsight cover pull requests and issues too?',
+          question: 'Does EIPsInsight cover pull requests and issues too?',
           answer:
-            'Yes. EIPInsight links standards data with pull requests, issue activity, review metadata, and governance context so you can understand both proposal text and implementation discussion.',
+            'Yes. EIPsInsight links standards data with pull requests, issue activity, review metadata, and governance context so you can understand both proposal text and implementation discussion.',
         },
         {
-          question: 'Do I need an account or persona to use EIPInsight?',
+          question: 'Do I need an account or persona to use EIPsInsight?',
           answer:
             'No. Most content is available without sign-in. Personas are preference presets that tune navigation and defaults for different workflows such as developer, editor, or researcher.',
         },
@@ -2162,7 +2162,7 @@ export default function Home() {
                 <div className="section-label">About</div>
                 <CopyLinkButton targetId="about-overview" label="About section" />
               </div>
-              <h2 className="about-title">EIPInsight turns Ethereum standards activity into something people can actually navigate.</h2>
+              <h2 className="about-title">EIPsInsight turns Ethereum standards activity into something people can actually navigate.</h2>
               <p className="about-summary">
                 We build an operational view of EIPs, ERCs, RIPs, proposal workflows, and governance movement so builders, editors, researchers, and newcomers can understand what is changing and why.
               </p>
@@ -2198,7 +2198,7 @@ export default function Home() {
                   Ethereum governance happens across repositories, pull requests, review queues, forum threads, upgrades, and informal coordination. The data is public, but the workflow is still hard to inspect as a system.
                 </p>
                 <p>
-                  EIPInsight exists to reduce that gap. We aggregate the moving parts, normalize them into product surfaces, and help people answer practical questions: what changed, what is stuck, who is active, what upgrade work depends on what, and where to go next.
+                  EIPsInsight exists to reduce that gap. We aggregate the moving parts, normalize them into product surfaces, and help people answer practical questions: what changed, what is stuck, who is active, what upgrade work depends on what, and where to go next.
                 </p>
                 <p>
                   The goal is not just more charts. The goal is operational clarity for anyone trying to understand or participate in Ethereum standards.
@@ -2481,7 +2481,7 @@ export default function Home() {
 
             <AnchorHeading targetId="upcoming-glamsterdam" title="Upcoming: Glamsterdam" level="h3" />
             <p>
-              EIPInsight uses the upgrade timeline to keep the next phase of Ethereum visible, from current standards work through the proposals expected to land in Glamsterdam and beyond.
+              EIPsInsight uses the upgrade timeline to keep the next phase of Ethereum visible, from current standards work through the proposals expected to land in Glamsterdam and beyond.
             </p>
           </section>
 

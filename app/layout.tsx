@@ -17,7 +17,7 @@ const _libreBaskerville = Libre_Baskerville({
 });
 
 export const metadata: Metadata = {
-  title: 'EIPInsight Documentation',
+  title: 'EIPsInsight Documentation',
   description: 'Track Ethereum Improvement Proposals with live status, governance signals, lifecycle data, and historical context.',
   icons: {
     icon: '/eipFavicon.png',
@@ -26,23 +26,23 @@ export const metadata: Metadata = {
   },
   metadataBase: new URL('https://docs.eipsinsight.com'),
   openGraph: {
-    title: 'EIPInsight Documentation',
+    title: 'EIPsInsight Documentation',
     description: 'Track Ethereum Improvement Proposals with live status, governance signals, lifecycle data, and historical context.',
     url: 'https://docs.eipsinsight.com',
-    siteName: 'EIPInsight',
+    siteName: 'EIPsInsight',
     images: [
       {
         url: '/docseipsinsighthero.png',
         width: 865,
         height: 463,
-        alt: 'EIPInsight documentation hero preview',
+        alt: 'EIPsInsight documentation hero preview',
       },
     ],
     type: 'website',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'EIPInsight Documentation',
+    title: 'EIPsInsight Documentation',
     description: 'Track Ethereum Improvement Proposals with live status, governance signals, lifecycle data, and historical context.',
     images: ['/docseipsinsighthero.png'],
   },
